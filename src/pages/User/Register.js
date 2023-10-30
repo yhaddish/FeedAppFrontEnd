@@ -7,6 +7,8 @@ import Button from "../../components/Button";
 import Badge from "../../components/Badge";
 import LogoImage from "../../assets/images/logo.png";
 import { registerApi } from "../../util/ApiUtil";
+
+
 const Register = () => {
   const formikRef = useRef();
   const [isFetching, setIsFetching] = useState(false);
