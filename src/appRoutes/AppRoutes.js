@@ -13,10 +13,7 @@ import ForgotPassword from "../pages/User/ForgotPassword";
 import ResetPassword from "../pages/User/ResetPassword";
 import Wrapper from "../components/Wrapper";
 import NavBar from "../components/NavBar";
-
-//imported
 import { AppContext } from "../context/applicationContext";
-
 import LoadingIndicator from "../components/LoadingIndicator";
 import { sessionApi } from "../util/ApiUtil";
 import Dashboard from "../pages/App/Dashboard";
