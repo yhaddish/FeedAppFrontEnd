@@ -11,80 +11,83 @@ import { AppContext } from "../context/applicationContext";
 import { convertBase64 } from "../util/Helper";
 
 const AddFeed = () => {
+
   const formikRef = useRef();
-  const imageSelectRef = useRef();
+const imageSelectRef = useRef();
 
-  const [isFetching, setIsFetching] = useState(false);
-  const [modalIsOpen, setIsOpen] = React.useState(false);
-  const [uploadImageData, setUploadImageData] = React.useState(undefined);
-  const [imageSrc, setImageSrc] = React.useState(undefined);
+const [isFetching, setIsFetching] = useState(false);
+const [modalIsOpen, setIsOpen] = React.useState(false);
+const [uploadImageData, setUploadImageData] = React.useState(undefined);
+const [imageSrc, setImageSrc] = React.useState(undefined);
 
-  const appContext = useContext(AppContext);
-  const token = appContext.getSession();
+const appContext = useContext(AppContext);
+const token = appContext.getSession();
 
-  useEffect(() => {
-    if (imageSrc) {
-      formikRef.current.setFieldValue("picture", imageSrc);
+useEffect(() => {
+  if (imageSrc) {
+    formikRef.current.setFieldValue("picture", imageSrc);
+  }
+}, [imageSrc]);
+
+const closeModal = () => {
+  setUploadImageData(undefined);
+  formikRef.current.setFieldValue("picture", undefined);
+  setIsOpen(false);
+};
+
+const onSelectFile = async (e) => {
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0];
+    const base64 = await convertBase64(file);
+    setUploadImageData(base64);
+    setIsOpen(true);
+  }
+};
+
+const onFormSubmit = async (values) => {
+  console.log(values);
+  if (!isFetching) {
+    setIsFetching(true);
+
+    const apiResponse = await addFeedApi(
+      token,
+      values.content,
+      values.picture
+    );
+
+    if (apiResponse.status === 1) {
+      formikRef.current.setFieldValue("formMessage", "Feed has been added.");
+      formikRef.current.setFieldValue("content", "");
+      formikRef.current.setFieldValue("picture", "");
+      setUploadImageData(undefined);
+      setImageSrc(undefined);
+    } else {
+      formikRef.current.setFieldValue("formMessage", apiResponse.payLoad);
     }
-  }, [imageSrc]);
+    setIsFetching(false);
+  }
+};
 
-  const closeModal = () => {
-    setUploadImageData(undefined);
-    formikRef.current.setFieldValue("picture", undefined);
-    setIsOpen(false);
-  };
+const AddFeedSchema = Yup.object().shape({
+  content: Yup.string().required("Feed content/image is missing"),
+  picture: Yup.string().required("Required"),
+});
 
-  const onSelectFile = async (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const base64 = await convertBase64(file);
-      setUploadImageData(base64);
-      setIsOpen(true);
-    }
-  };
-
-  const onFormSubmit = async (values) => {
-    console.log(values);
-    if (!isFetching) {
-      setIsFetching(true);
-
-      const apiResponse = await addFeedApi(
-        token,
-        values.content,
-        values.picture
-      );
-
-      if (apiResponse.status === 1) {
-        formikRef.current.setFieldValue("formMessage", "Feed has been added.");
-        formikRef.current.setFieldValue("content", "");
-        formikRef.current.setFieldValue("picture", "");
-        setUploadImageData(undefined);
-        setImageSrc(undefined);
-      } else {
-        formikRef.current.setFieldValue("formMessage", apiResponse.payLoad);
-      }
-      setIsFetching(false);
-    }
-  };
-
-  const AddFeedSchema = Yup.object().shape({
-    content: Yup.string().required("Feed content/image is missing"),
-    picture: Yup.string().required("Required"),
-  });
 
   return (
     <>
-      {modalIsOpen && uploadImageData && (
-        <ImageCropper
-          modalIsOpen={modalIsOpen}
-          closeModal={closeModal}
-          uploadImageData={uploadImageData}
-          setImageSrc={setImageSrc}
-        />
-      )}
+    {modalIsOpen && uploadImageData && (
+      <ImageCropper
+        modalIsOpen={modalIsOpen}
+        closeModal={closeModal}
+        uploadImageData={uploadImageData}
+        setImageSrc={setImageSrc}
+      />
+    )}
 
-      {/* {#AddFeedForm} */}
-      <Formik
+    {/* {#AddFeedForm} */}
+
+    <Formik
         innerRef={formikRef}
         initialValues={{
           content: "",
@@ -183,8 +186,11 @@ const AddFeed = () => {
           </Form>
         )}
       </Formik>
-    </>
+      
+</>
   );
+
+
 };
 
 export default AddFeed;
